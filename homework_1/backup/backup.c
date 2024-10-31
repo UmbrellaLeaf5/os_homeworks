@@ -70,3 +70,11 @@ int BackupFolder(const char *source_folder, const char *dest_folder) {
   closedir(src_folder);
   return 0;
 }
+
+int Backup(int argc, char *argv[]) {
+  if (argc != 3)
+    return Error("Usage: %s <source directory> <destination directory>\n",
+                 argv[0]);
+
+  return BackupFolder(argv[1], argv[2]);
+}
