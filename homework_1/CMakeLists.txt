@@ -35,7 +35,7 @@ endforeach()
 
 # ---------------------------------     Copy extra files    --------------------------------
 file(GLOB_RECURSE EXTRA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*")
-file(GLOB_RECURSE PROJECT_FILES "*.c" "*.h")
+file(GLOB_RECURSE PROJECT_FILES "*.c" "*.h" "*.md")
 
 list(REMOVE_ITEM EXTRA_FILES ${PROJECT_FILES})
 
