@@ -1,7 +1,7 @@
 #include "lib.h"
 
 int Error(const char* format, ...) {
-  // Вывод сообщений об ошибках в stderr
+  // вывод сообщений об ошибках в stderr
   va_list args;
   va_start(args, format);
 
@@ -12,7 +12,7 @@ int Error(const char* format, ...) {
 }
 
 int ErrorWithFiles(const char* format, ...) {
-  // Вывод сообщений об ошибках в stderr
+  // вывод сообщений об ошибках в stderr
   va_list args;
   va_start(args, format);
 
@@ -20,7 +20,7 @@ int ErrorWithFiles(const char* format, ...) {
 
   va_end(args);
 
-  // Закрытие файлов
+  // закрытие файлов
   va_list file_args;
   va_start(file_args, format);
 

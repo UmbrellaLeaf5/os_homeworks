@@ -2,50 +2,70 @@
 
 #include "lib.h"
 
-int Useless(int argc, char **argv, int max_args) {
-  if (argc != 2) return Error("Wrong usage! Use: %s <file_name>\n", argv[0]);
+int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
+  if (argc != 2)  // кол-во аргументов должно быть строго 2 (+ название файла)
+    return Error("Wrong usage! Use: %s <file_name>\n", argv[0]);
 
+  // получение имени файла и его открытие на чтение
   char *file_name = argv[1];
   FILE *file = fopen(file_name, "r");
 
   if (file == NULL)
     return Error("Error opening file '%s': %s\n", file_name, strerror(errno));
 
-  char line[1024];
+  // строка файла
+  char file_line[file_line_max_len];
 
-  while (fgets(line, sizeof(line), file) != NULL) {
-    char *delay_str = strtok(line, " ");
+  // чтение строк файла, пока не встретим конец
+  while (fgets(file_line, sizeof(file_line), file) != NULL) {
+    // время выполнения команды (до пробела)
+    char *command_delay_str = strtok(file_line, " ");
+
+    // имя команды (до переноса)
     char *command_name = strtok(NULL, " \n");
 
-    if (delay_str == NULL || command_name == NULL) {
-      Error("Invalid line in file: %s\n", line);
+    // если какая-то из частей NULL, пропускаем
+    if (command_delay_str == NULL || command_name == NULL) {
+      Error("Invalid line in file: %s\n", file_line);
       continue;
     }
 
-    sleep(atoi(delay_str));
+    // задержка на кол-во секунд в command_delay_str
+    sleep((unsigned int)atoi(command_delay_str));
 
+    // аргументы команды
     char *command_args[max_args];
+
+    // первый аргумент команды - имя команды.
     command_args[0] = command_name;
-    int i = 1;
+    int command_arg_count = 1;
 
-    for (char *arg = strtok(NULL, " \n"); arg != NULL && i < max_args - 1;
+    // получение аргументов из строки
+    for (char *arg = strtok(NULL, " \n");
+         arg != NULL && command_arg_count < max_args - 1;
          arg = strtok(NULL, " \n"))
-      command_args[i++] = arg;
+      command_args[command_arg_count++] = arg;
 
-    command_args[i] = NULL;
+    // последний аргумент NULL
+    command_args[command_arg_count] = NULL;
+
+    // дочерний процесс
     pid_t pid = fork();
 
+    // fork не удался
     if (pid < 0)
       return ErrorWithFiles("Error forking: %s\n", strerror(errno), file);
 
+    // выполняется только в дочернем процессе.
     if (pid == 0) {
-      // child process
+      // дочерний процесс: запуск команды с аргументами.
       execvp(command_name, command_args);
+
+      // в том случае, если команда не выполнилась (управление перешло обратно)
       return ErrorWithFiles("Error executing command '%s': %s\n", command_name,
                             strerror(errno), file);
     }
 
-    // parent process
     waitpid(pid, NULL, 0);
   }
 
