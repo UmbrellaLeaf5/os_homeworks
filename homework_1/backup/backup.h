@@ -6,6 +6,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-int BackupFile(const char *src_file, const char *dst_file);
+int BackupFile(const char *source_file, const char *dest_file);
 
-int BackupFolder(const char *src_dir, const char *dst_dir);
+int BackupFolder(const char *source_folder, const char *dest_folder);
