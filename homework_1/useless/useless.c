@@ -57,13 +57,12 @@ int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
       return ErrorWithFiles("Error forking: %s\n", strerror(errno), file);
 
     // выполняется только в дочернем процессе.
-    if (pid == 0) {
+    if (pid == 0)
       // дочерний процесс: запуск команды с аргументами.
       if (execvp(command_name, command_args) == -1)
         // в том случае, если команда не выполнилась
         return ErrorWithFiles("Error executing command '%s': %s\n",
                               command_name, strerror(errno), file);
-    }
 
     waitpid(pid, NULL, 0);
   }

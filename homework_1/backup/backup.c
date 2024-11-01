@@ -7,13 +7,15 @@ int BackupFile(const char *source_file, const char *dest_file) {
   FILE *src_file = fopen(source_file, "rb");
 
   if (src_file == NULL)
-    return ErrorWithFiles("Error opening source file", src_file);
+    return Error("Error opening source file '%s': %s\n", source_file,
+                 strerror(errno));
 
   // целевой файл в режиме записи двоичных данных
   FILE *dst_file = fopen(dest_file, "wb");
 
   if (dst_file == NULL)
-    return ErrorWithFiles("Error opening destination file", dst_file);
+    return Error("Error opening destination file '%s': %s\n", dest_file,
+                 strerror(errno));
 
   // буфер для чтения данных
   char buffer[4096];
@@ -34,12 +36,11 @@ int BackupFile(const char *source_file, const char *dest_file) {
   if (pid < 0) return Error("Error forking: %s\n", strerror(errno));
 
   // выполняется только в дочернем процессе.
-  if (pid == 0) {
+  if (pid == 0)
     // дочерний процесс: запуск команды с аргументами (выполнение сжатия)
     if (execlp("gzip", "gzip", dest_file, NULL) == -1)
       // в том случае, если команда не выполнилась
-      return Error("Error compressing file");
-  }
+      return Error("Error compressing file\n");
 
   waitpid(pid, NULL, 0);
 
@@ -47,25 +48,25 @@ int BackupFile(const char *source_file, const char *dest_file) {
 }
 
 int BackupFolder(const char *source_folder, const char *dest_folder) {
-  // информация об исходной папке
-  struct stat st_src_folder;
-
-  // проверка существует ли исходная папка
-  if (stat(source_folder, &st_src_folder) != 0 ||
-      !S_ISDIR(st_src_folder.st_mode))
-    return Error(
-        "Source directory '%s' does not exist or is not a directory.\n",
-        source_folder);
-
   // открытие исходной папки для чтения
   DIR *src_folder = opendir(source_folder);
 
-  if (src_folder == NULL) return Error("Error opening source directory");
+  if (src_folder == NULL)
+    return Error("Error opening source folder '%s': %s\n", source_folder,
+                 strerror(errno));
+
+  // открытие целевой папки для чтения
+  DIR *dst_folder = opendir(dest_folder);
+
+  if (dst_folder == NULL) mkdir(dest_folder, 0755);
+
+  closedir(dst_folder);
 
   // перебор элементов папки
   for (struct dirent *entry = readdir(src_folder); entry != NULL;
        entry = readdir(src_folder)) {
-    // !пропуск текущего элемента (".") и родительского элемента ("..")
+    // пропуск текущего элемента и родительского элемента
+    // (во избежание лишней рекурсии)
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
       continue;
 
