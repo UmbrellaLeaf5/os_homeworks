@@ -6,22 +6,21 @@ int BackupFile(const char *source_file, const char *dest_file) {
   // исходный файл в режиме чтения двоичных данных
   FILE *src_file = fopen(source_file, "rb");
 
-  if (src_file == NULL)
+  if (!src_file)
     return Error("Error opening source file '%s': %s\n", source_file,
                  strerror(errno));
 
   // целевой файл в режиме записи двоичных данных
   FILE *dst_file = fopen(dest_file, "wb");
 
-  if (dst_file == NULL)
+  if (!dst_file)
     return Error("Error opening destination file '%s': %s\n", dest_file,
                  strerror(errno));
 
   // буфер для чтения данных
   char buffer[4096];
   // чтение данных из исходного файла до конца
-  for (size_t bytes = fread(buffer, 1, sizeof(buffer), src_file); bytes > 0;
-       bytes = fread(buffer, 1, sizeof(buffer), src_file))
+  for (size_t bytes; (bytes = fread(buffer, 1, sizeof(buffer), src_file)) > 0;)
 
     // запись прочитанных данных в целевой файл
     fwrite(buffer, 1, bytes, dst_file);
@@ -51,20 +50,19 @@ int BackupFolder(const char *source_folder, const char *dest_folder) {
   // открытие исходной папки для чтения
   DIR *src_folder = opendir(source_folder);
 
-  if (src_folder == NULL)
+  if (!src_folder)
     return Error("Error opening source folder '%s': %s\n", source_folder,
                  strerror(errno));
 
   // открытие целевой папки для чтения
   DIR *dst_folder = opendir(dest_folder);
 
-  if (dst_folder == NULL) mkdir(dest_folder, 0755);
+  if (!dst_folder) mkdir(dest_folder, 0755);
 
   closedir(dst_folder);
 
   // перебор элементов папки
-  for (struct dirent *entry = readdir(src_folder); entry != NULL;
-       entry = readdir(src_folder)) {
+  for (struct dirent *entry; (entry = readdir(src_folder));) {
     // пропуск текущего элемента и родительского элемента
     // (во избежание лишней рекурсии)
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)

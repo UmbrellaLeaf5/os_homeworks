@@ -10,14 +10,14 @@ int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
   char *file_name = argv[1];
   FILE *file = fopen(file_name, "r");
 
-  if (file == NULL)
+  if (!file)
     return Error("Error opening file '%s': %s\n", file_name, strerror(errno));
 
   // строка файла
   char file_line[file_line_max_len];
 
   // чтение строк файла, пока не встретим конец
-  while (fgets(file_line, sizeof(file_line), file) != NULL) {
+  while (fgets(file_line, sizeof(file_line), file)) {
     // время выполнения команды (до пробела)
     char *command_delay_str = strtok(file_line, " ");
 
@@ -25,7 +25,7 @@ int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
     char *command_name = strtok(NULL, " \n");
 
     // если какая-то из частей NULL, пропускаем
-    if (command_delay_str == NULL || command_name == NULL) {
+    if (!command_delay_str || !command_name) {
       Error("Invalid line in file: %s\n", file_line);
       continue;
     }
@@ -41,9 +41,8 @@ int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
     int command_arg_count = 1;
 
     // получение аргументов из строки
-    for (char *arg = strtok(NULL, " \n");
-         arg != NULL && command_arg_count < max_args - 1;
-         arg = strtok(NULL, " \n"))
+    for (char *arg;
+         (arg = strtok(NULL, " \n")) && command_arg_count < max_args - 1;)
       command_args[command_arg_count++] = arg;
 
     // последний аргумент NULL

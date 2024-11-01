@@ -24,9 +24,7 @@ int ErrorWithFiles(const char* format, ...) {
   va_list file_args;
   va_start(file_args, format);
 
-  for (FILE* file = va_arg(file_args, FILE*); file != NULL;
-       file = va_arg(file_args, FILE*))
-    fclose(file);
+  for (FILE* file; (file = va_arg(file_args, FILE*));) fclose(file);
 
   va_end(file_args);
 
