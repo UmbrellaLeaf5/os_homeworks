@@ -11,10 +11,10 @@ int BackupFile(const char *source_file, const char *dest_file) {
                  strerror(errno));
 
   // целевой файл в режиме записи двоичных данных
-  FILE *dst_file = fopen(dest_file, "wb");
+  FILE *dst_file = fopen(dest_file, "wb+");
 
   if (!dst_file)
-    return Error("Error opening destination file '%s': %s\n", dest_file,
+    return Error("Error creating destination file '%s': %s\n", dest_file,
                  strerror(errno));
 
   // буфер для чтения данных
@@ -76,27 +76,35 @@ int BackupFolder(const char *source_folder, const char *dest_folder) {
     char dst_path[512];
     snprintf(dst_path, sizeof(dst_path), "%s/%s", dest_folder, entry->d_name);
 
-    // если элемент - это папка
-    if (entry->d_type == DT_DIR) {
-      // целевая папку
+    // получаем информацию об исходном объекте
+    struct stat src_stat;
+    stat(src_path, &src_stat);
+
+    // исходный объект - папка
+    if (S_ISDIR(src_stat.st_mode)) {
       mkdir(dst_path, 0755);
       BackupFolder(src_path, dst_path);
 
-    } else if (entry->d_type == DT_REG) {
-      // целевой файл отсутствует, делаем резервную копию
-      if (access(dst_path, F_OK) == -1) BackupFile(src_path, dst_path);
+    } else if (S_ISREG(src_stat.st_mode)) {  // исходный объект - обычный файл
+      // целевой архивный файл
+      char dst_path_gz[sizeof(dst_path) + sizeof(".gz")];
+      snprintf(dst_path_gz, sizeof(dst_path_gz), "%s.gz", dst_path);
 
-      // целевой файл существует
-      else {
-        // получаем информацию о времени изменения исходного и целевого файлов
-        struct stat src_stat, dst_stat;
-        stat(src_path, &src_stat);
-        stat(dst_path, &dst_stat);
-
-        // если исходный файл изменен позже, чем целевой, делаем резервную копию
-        if (src_stat.st_mtime > dst_stat.st_mtime)
+      struct stat dst_stat, dst_stat_gz;
+      // целевой архивный файл отсутствует, делаем резервную копию
+      if (stat(dst_path_gz, &dst_stat_gz) == -1)
+        // целевой файл с таким же названием отсутствует
+        if (stat(dst_path, &dst_stat) == -1)
           BackupFile(src_path, dst_path);
-      }
+
+        else  // иначе уведомляем об ошибке
+          Error("Error during backup: '%s' already exists\n", dst_path);
+
+      // целевой архивный файл существует
+      else
+        // исходный изменен позже целевого архивного, делаем резервную копию
+        if (src_stat.st_mtime > dst_stat_gz.st_mtime)
+          BackupFile(src_path, dst_path);
     }
   }
 
