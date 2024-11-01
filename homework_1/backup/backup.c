@@ -18,19 +18,30 @@ int BackupFile(const char *source_file, const char *dest_file) {
   // буфер для чтения данных
   char buffer[4096];
   // чтение данных из исходного файла до конца
-  for (size_t bytes; (bytes = fread(buffer, 1, sizeof(buffer), src_file)) > 0;)
+  for (size_t bytes = fread(buffer, 1, sizeof(buffer), src_file); bytes > 0;
+       bytes = fread(buffer, 1, sizeof(buffer), src_file))
+
     // запись прочитанных данных в целевой файл
     fwrite(buffer, 1, bytes, dst_file);
 
   fclose(src_file);
   fclose(dst_file);
 
-  // команда сжатия файла с помощью gzip
-  char gzip_command[512];
-  snprintf(gzip_command, sizeof(gzip_command), "gzip %s", dest_file);
+  // дочерний процесс
+  pid_t pid = fork();
 
-  // выполнение сжатия
-  if (system(gzip_command) == -1) return Error("Error compressing file");
+  // fork не удался
+  if (pid < 0) return Error("Error forking: %s\n", strerror(errno));
+
+  // выполняется только в дочернем процессе.
+  if (pid == 0) {
+    // дочерний процесс: запуск команды с аргументами (выполнение сжатия)
+    if (execlp("gzip", "gzip", dest_file, NULL) == -1)
+      // в том случае, если команда не выполнилась
+      return Error("Error compressing file");
+  }
+
+  waitpid(pid, NULL, 0);
 
   return 0;
 }
