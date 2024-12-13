@@ -22,14 +22,12 @@ endif()
 file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true ".")
 
 foreach(DIR ${SUBDIRS})
-  IF(IS_DIRECTORY ${DIR})
-    IF(${DIR} MATCHES "${PROJECT_NAME}/homework_[^/]*$")
+  if(IS_DIRECTORY ${DIR})
+    if(${DIR} MATCHES "${PROJECT_NAME}/homework_[^/]*$")
       # message(${DIR})
       add_subdirectory(${DIR})
-    ENDIF()
-  ELSE()
-    CONTINUE()
-  ENDIF()
+    endif()
+  endif()
 endforeach()
 
 # Lib
