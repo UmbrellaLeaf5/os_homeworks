@@ -1,4 +1,4 @@
-# Программа useless (Unix System Extremely Late ExecutionSoftware System)
+# Программа useless (Unix System Extremely Late Execution Software System)
 Читает файл и запускает указанные в нём программы с указанной задержкой от времени старта программы useless.
 
 Формат записи в файле: «время задержки в секундах» «программа для выполнения».
