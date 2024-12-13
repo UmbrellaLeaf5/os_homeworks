@@ -75,15 +75,18 @@ int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
 
         // первый аргумент команды - имя команды
         command_args[0] = command_name;
-        int command_arg_count = 1;
 
-        // получение аргументов из строки
-        for (char *arg;
-             (arg = strtok(NULL, " \n")) && command_arg_count < max_args - 1;)
-          command_args[command_arg_count++] = arg;
+        {
+          int command_arg_count = 1;
 
-        // последний аргумент NULL
-        command_args[command_arg_count] = NULL;
+          // получение аргументов из строки
+          for (char *arg;
+               (arg = strtok(NULL, " \n")) && command_arg_count < max_args - 1;)
+            command_args[command_arg_count++] = arg;
+
+          // последний аргумент NULL
+          command_args[command_arg_count] = NULL;
+        }
 
         // дочерний процесс
         pid_t pid = fork();
@@ -92,9 +95,9 @@ int Useless(int argc, char **argv, int max_args, int file_line_max_len) {
         if (pid < 0)
           return ErrorWithFiles("Error forking: %s\n", strerror(errno), file);
 
-        // выполняется только в дочернем процессе.
+        // выполняется только в дочернем процессе:
         if (pid == 0)
-          // дочерний процесс: запуск команды с аргументами.
+          // дочерний процесс: запуск команды с аргументами
           if (execvp(command_name, command_args) == -1)
             // в том случае, если команда не выполнилась
             return ErrorWithFiles("Error executing command '%s': %s\n",

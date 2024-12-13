@@ -2,6 +2,12 @@
 
 #include "lib.h"
 
+/**
+ * @brief Архивирует файл.
+ * @param source_file: путь к исходному файлу.
+ * @param dest_file: путь к файлу резервной копии.
+ * @return 0, если программа успешно завершилась, иначе код ошибки.
+ */
 int BackupFile(const char *source_file, const char *dest_file) {
   // исходный файл в режиме чтения двоичных данных
   FILE *src_file = fopen(source_file, "rb");
@@ -46,6 +52,12 @@ int BackupFile(const char *source_file, const char *dest_file) {
   return 0;
 }
 
+/**
+ * @brief Архивирует папку.
+ * @param source_folder: путь к исходной папке.
+ * @param dest_folder: путь к папке резервной копии.
+ * @return 0, если программа успешно завершилась, иначе код ошибки.
+ */
 int BackupFolder(const char *source_folder, const char *dest_folder) {
   // открытие исходной папки для чтения
   DIR *src_folder = opendir(source_folder);

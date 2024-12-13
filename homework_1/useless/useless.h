@@ -15,6 +15,7 @@
  * @param argc: количество аргументов командной строки.
  * @param argv: массив аргументов командной строки.
  * @param max_args: максимальное количество аргументов для команд.
+ * @param file_line_max_len: максимальная длина строки в файле
  * @return 0, если программа успешно завершилась, иначе код ошибки.
  */
 int Useless(int argc, char **argv, int max_args, int file_line_max_len);
