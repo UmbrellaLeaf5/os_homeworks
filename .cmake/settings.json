@@ -1,0 +1,24 @@
+{
+  "REPO_LANGUAGES": [
+    "C"
+  ],
+  "CMAKE_C_STANDARD": 17,
+  "CMAKE_C_FLAGS": [
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-std=c17",
+    "-O2"
+  ],
+  "HEADERS_FORMAT": [
+    "*.h"
+  ],
+  "SOURCES_FORMAT": [
+    "*.c"
+  ],
+  "LIB_NAME": "lib",
+  "LESSON_PREFIX": "homework_",
+  "TASK_PREFIXES": [
+    ""
+  ]
+}
