@@ -1,19 +1,13 @@
 # language: CMake
 
-# ---------------------------------     Project setup      ---------------------------------
-cmake_minimum_required(VERSION 3.20)
+include(${REPO_FOLDER}/settings.cmake)
 
-project(Lib LANGUAGES C)
+# Library
+file(GLOB_RECURSE SOURCES ${SOURCES_FORMAT} ${HEADERS_FORMAT})
 
-# ---------------------------------     Set C settings     ---------------------------------
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic -std=c17 -O2")
+add_library(${LIB_NAME} ${SOURCES})
 
-# ---------------------------------       Add library       --------------------------------
-file(GLOB_RECURSE SOURCE_LIST "*.c" "*.h")
+LastElement(REPO_LANGUAGES LIB_LANGUAGE)
 
-add_library(Lib ${SOURCE_LIST})
-
-set_target_properties(Lib PROPERTIES LINKER_LANGUAGE C)
-target_include_directories(Lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE ${LIB_LANGUAGE})
+target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

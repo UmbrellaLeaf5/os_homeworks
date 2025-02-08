@@ -1,40 +1,48 @@
 # language: CMake
 
-# ---------------------------------     Project setup      ---------------------------------
-cmake_minimum_required(VERSION 3.20)
+include(${REPO_FOLDER}/settings.cmake)
 
-get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
-project(${PROJECT_NAME} LANGUAGES C)
+# Libraries
 
-# ---------------------------------     Set C settings     ---------------------------------
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic -std=c17 -O2")
+# find_package()
+# add_library()
 
-# ---------------------------------   Set CMake settings   ---------------------------------
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Add executable
+file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true ".")
 
-# ---------------------------------      Add executable     --------------------------------
-file(GLOB_RECURSE SUBFOLDERS LIST_DIRECTORIES true ".")
+string(REPLACE ";" "|" PREFIX "${TASK_PREFIXES}")
 
-foreach(SUBDIR ${SUBFOLDERS})
+foreach(SUBDIR ${SUBDIRS})
   if(IS_DIRECTORY ${SUBDIR})
-    get_filename_component(SUBPROJECT_NAME ${SUBDIR} NAME)
-    set(SUBPROJECT_NAME "${PROJECT_NAME}_${SUBPROJECT_NAME}")
+    if("${SUBDIR}" MATCHES "${PROJECT_NAME}/(${PREFIX})[^/]*$")
+      get_filename_component(SUBPROJECT_NAME ${SUBDIR} NAME)
+      set(SUBPROJECT_NAME "${PROJECT_NAME}_${SUBPROJECT_NAME}")
 
-    file(GLOB_RECURSE SUBPROJECT_SOURCES "${SUBDIR}/*.h" "${SUBDIR}/*.c")
+      # (files only in one subfolder)
+      file(GLOB SUBPROJECT_SOURCES
+        ${SUBDIR}/${HEADERS_FORMAT}
+        ${SUBDIR}/${SOURCES_FORMAT}
+      )
 
-    add_executable(${SUBPROJECT_NAME} ${SUBPROJECT_SOURCES})
+      set(SUBPROJECT_SOURCES)
 
-    find_library(Lib ../)
-    target_link_libraries(${SUBPROJECT_NAME} PUBLIC Lib)
+      foreach(ITEM_HEADER IN LISTS HEADERS_FORMAT)
+        file(GLOB ITEM_HEADER_FORMAT_SOURCES ${SUBDIR}/${ITEM_HEADER})
+        list(APPEND SUBPROJECT_SOURCES ${ITEM_HEADER_FORMAT_SOURCES})
+      endforeach()
+
+      foreach(ITEM_SOURCE IN LISTS SOURCES_FORMAT)
+        file(GLOB ITEM_SOURCE_FORMAT_SOURCES ${SUBDIR}/${ITEM_SOURCE})
+        list(APPEND SUBPROJECT_SOURCES ${ITEM_SOURCE_FORMAT_SOURCES})
+      endforeach()
+
+      add_executable(${SUBPROJECT_NAME} ${SUBPROJECT_SOURCES})
+
+      target_link_libraries(${SUBPROJECT_NAME} PRIVATE ${LIB_NAME})
+      target_include_directories(${SUBPROJECT_NAME} PRIVATE ${REPO_FOLDER}/${LIB_NAME})
+    endif()
   endif()
 endforeach()
 
-# ---------------------------------     Copy extra files    --------------------------------
-file(GLOB_RECURSE EXTRA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/*")
-file(GLOB_RECURSE PROJECT_FILES "*.c" "*.h" "*.md")
-
-list(REMOVE_ITEM EXTRA_FILES ${PROJECT_FILES})
-
-file(COPY ${EXTRA_FILES} DESTINATION ${PROJECT_BINARY_DIR})
+# For this project
+CopyExtraFiles({})

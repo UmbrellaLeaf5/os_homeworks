@@ -1,34 +1,20 @@
 # language: CMake
 
-# ---------------------------------     Project setup      ---------------------------------
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
-get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
-project(${PROJECT_NAME} LANGUAGES C)
+project(project)
+include(.cmake/settings.cmake)
 
-# ---------------------------------     Set C settings     ---------------------------------
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic -std=c17 -O2")
+# Lesson folders
+file(GLOB_RECURSE DIRS LIST_DIRECTORIES true ".")
 
-# ---------------------------------   Set CMake settings   ---------------------------------
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-if(NOT LINUX)
-  message(WARNING "Use Linux operating system!")
-endif()
-
-# ---------------------------------    Add subdirectories   --------------------------------
-file(GLOB_RECURSE SUBDIRS LIST_DIRECTORIES true ".")
-
-foreach(DIR ${SUBDIRS})
+foreach(DIR ${DIRS})
   if(IS_DIRECTORY ${DIR})
-    if(${DIR} MATCHES "${PROJECT_NAME}/homework_[^/]*$")
-      # message(${DIR})
+    if(${DIR} MATCHES "${PROJECT_NAME}/${LESSON_PREFIX}[^/]*$")
       add_subdirectory(${DIR})
     endif()
   endif()
 endforeach()
 
-# Lib
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+# Library
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME})
